@@ -4,33 +4,230 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Pig Game 3D • Radiant Royale</title>
+    <!-- Modern Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Fredoka:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
-    <title>Pig Game</title>
   </head>
   <body>
-    <main>
-      <section class="player player--0 player--active">
-        <h2 class="name" id="name--0">Player 1</h2>
-        <p class="score" id="score--0">43</p>
-        <div class="current">
-          <p class="current-label">Current</p>
-          <p class="current-score" id="current--0">0</p>
-        </div>
-      </section>
-      <section class="player player--1">
-        <h2 class="name" id="name--1">Player 2</h2>
-        <p class="score" id="score--1">24</p>
-        <div class="current">
-          <p class="current-label">Current</p>
-          <p class="current-score" id="current--1">0</p>
-        </div>
-      </section>
+    <!-- Ambient glowing light orbs in background -->
+    <div class="ambient-glow glow--1"></div>
+    <div class="ambient-glow glow--2"></div>
+    <div class="ambient-glow glow--3"></div>
 
-      <img src="dice-5.png" alt="Playing dice" class="dice" />
-      <button class="btn btn--new">🔄 New game</button>
-      <button class="btn btn--roll">🎲 Roll dice</button>
-      <button class="btn btn--hold">📥 Hold</button>
-    </main>
+    <!-- Confetti canvas for victory celebration -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- App Wrapper -->
+    <div class="game-wrapper">
+      <!-- Top Control Bar -->
+      <header class="top-bar">
+        <div class="brand">
+          <span class="brand__icon">🎲</span>
+          <h1 class="brand__title">Pig <span>3D</span></h1>
+        </div>
+
+        <!-- Target score pills -->
+        <div class="target-control" title="Choose Winning Target Score">
+          <span class="target-control__label">Target:</span>
+          <div class="target-options">
+            <button class="target-btn" data-target="25">25</button>
+            <button class="target-btn active" data-target="50">50</button>
+            <button class="target-btn" data-target="100">100</button>
+          </div>
+        </div>
+
+        <!-- Action icons -->
+        <div class="header-actions">
+          <button class="icon-btn btn--sound" id="btn-sound" title="Toggle Sound FX (Key: M)">
+            <span class="sound-icon">🔊</span>
+          </button>
+          <button class="icon-btn btn--rules" id="btn-rules" title="Game Rules">
+            <span>❓</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Game Card -->
+      <main class="game-card">
+        <!-- PLAYER 0 -->
+        <section class="player player--0 player--active" id="player-card--0">
+          <div class="player__header">
+            <div class="avatar-badge avatar--0">
+              <span class="avatar-emoji">🐷</span>
+            </div>
+            <div class="turn-indicator">
+              <span class="turn-dot"></span>
+              <span class="turn-text">ACTIVE TURN</span>
+            </div>
+          </div>
+
+          <h2 class="name" id="name--0" title="Click to rename">Player 1</h2>
+          
+          <div class="score-container">
+            <span class="score-label">TOTAL SCORE</span>
+            <p class="score" id="score--0">0</p>
+          </div>
+
+          <div class="current">
+            <p class="current-label">ROUND POT</p>
+            <p class="current-score" id="current--0">0</p>
+          </div>
+
+          <!-- Notification reaction popup -->
+          <div class="player-popup" id="popup--0"></div>
+        </section>
+
+        <!-- PLAYER 1 -->
+        <section class="player player--1" id="player-card--1">
+          <div class="player__header">
+            <div class="avatar-badge avatar--1">
+              <span class="avatar-emoji">🦊</span>
+            </div>
+            <div class="turn-indicator">
+              <span class="turn-dot"></span>
+              <span class="turn-text">ACTIVE TURN</span>
+            </div>
+          </div>
+
+          <h2 class="name" id="name--1" title="Click to rename">Player 2</h2>
+
+          <div class="score-container">
+            <span class="score-label">TOTAL SCORE</span>
+            <p class="score" id="score--1">0</p>
+          </div>
+
+          <div class="current">
+            <p class="current-label">ROUND POT</p>
+            <p class="current-score" id="current--1">0</p>
+          </div>
+
+          <!-- Notification reaction popup -->
+          <div class="player-popup" id="popup--1"></div>
+        </section>
+
+        <!-- CENTER STAGE: Controls & 3D Dice -->
+        <div class="center-stage">
+          <!-- New Game Button -->
+          <button class="btn btn--new" id="btn-new" title="Start New Game (Key: N)">
+            <span class="btn__icon">🔄</span>
+            <span class="btn__text">New Game</span>
+            <kbd class="btn__key">N</kbd>
+          </button>
+
+          <!-- 3D Interactive Dice Stage -->
+          <div class="dice-stage" id="dice-stage" title="Click to Roll!">
+            <div class="dice-scene">
+              <div class="dice-cube" id="dice-cube">
+                <!-- Face 1 -->
+                <div class="dice-face dice-face--1">
+                  <span class="pip pip--center red-pip"></span>
+                </div>
+                <!-- Face 2 -->
+                <div class="dice-face dice-face--2">
+                  <span class="pip pip--top-left"></span>
+                  <span class="pip pip--bottom-right"></span>
+                </div>
+                <!-- Face 3 -->
+                <div class="dice-face dice-face--3">
+                  <span class="pip pip--top-left"></span>
+                  <span class="pip pip--center"></span>
+                  <span class="pip pip--bottom-right"></span>
+                </div>
+                <!-- Face 4 -->
+                <div class="dice-face dice-face--4">
+                  <span class="pip pip--top-left"></span>
+                  <span class="pip pip--top-right"></span>
+                  <span class="pip pip--bottom-left"></span>
+                  <span class="pip pip--bottom-right"></span>
+                </div>
+                <!-- Face 5 -->
+                <div class="dice-face dice-face--5">
+                  <span class="pip pip--top-left"></span>
+                  <span class="pip pip--top-right"></span>
+                  <span class="pip pip--center"></span>
+                  <span class="pip pip--bottom-left"></span>
+                  <span class="pip pip--bottom-right"></span>
+                </div>
+                <!-- Face 6 -->
+                <div class="dice-face dice-face--6">
+                  <span class="pip pip--top-left"></span>
+                  <span class="pip pip--top-right"></span>
+                  <span class="pip pip--mid-left"></span>
+                  <span class="pip pip--mid-right"></span>
+                  <span class="pip pip--bottom-left"></span>
+                  <span class="pip pip--bottom-right"></span>
+                </div>
+              </div>
+            </div>
+            <!-- Dynamic 3D floor shadow -->
+            <div class="dice-shadow" id="dice-shadow"></div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="action-buttons">
+            <button class="btn btn--action btn--roll" id="btn-roll" title="Roll the Dice (Spacebar)">
+              <span class="btn__icon">🎲</span>
+              <span class="btn__text">Roll Dice</span>
+              <kbd class="btn__key">Space</kbd>
+            </button>
+
+            <button class="btn btn--action btn--hold" id="btn-hold" title="Bank Your Points (Key: H)">
+              <span class="btn__icon">📥</span>
+              <span class="btn__text">Hold Score</span>
+              <kbd class="btn__key">H</kbd>
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Keyboard shortcuts legend -->
+      <footer class="game-footer">
+        <span class="shortcut-tip"><kbd>Space</kbd> Roll</span>
+        <span class="shortcut-tip"><kbd>H</kbd> Hold</span>
+        <span class="shortcut-tip"><kbd>N</kbd> New Game</span>
+        <span class="shortcut-tip"><kbd>M</kbd> Mute</span>
+      </footer>
+    </div>
+
+    <!-- Victory Announcement -->
+    <div class="modal-overlay winner-modal-overlay hidden" id="winner-modal" role="dialog" aria-modal="true" aria-labelledby="winner-title">
+      <div class="modal-content winner-modal-content">
+        <span class="winner-icon" aria-hidden="true">🏆</span>
+        <p class="winner-eyebrow">GAME OVER</p>
+        <h2 class="winner-title" id="winner-title">Victory!</h2>
+        <p class="winner-message" id="winner-message"></p>
+        <p class="winner-score">Final score <strong id="winner-score">0</strong></p>
+        <button class="btn btn--action btn--modal-ok" id="btn-play-again">
+          <span aria-hidden="true">🔄</span>
+          <span>Play Again</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Rules Modal Dialog -->
+    <div class="modal-overlay hidden" id="rules-modal">
+      <div class="modal-content">
+        <button class="modal-close" id="modal-close">&times;</button>
+        <div class="modal-header">
+          <span class="modal-header-icon">📖</span>
+          <h3>How to Play Pig Game</h3>
+        </div>
+        <ul class="rules-list">
+          <li><strong>🎲 Roll Dice:</strong> Roll to accumulate points into your <em>Round Pot</em>. You can keep rolling as many times as you dare!</li>
+          <li><strong>💥 Rolled a 1? BUST!</strong> Rolling a <code>1</code> wipes out your entire round pot and immediately passes the turn to the next player.</li>
+          <li><strong>📥 Hold:</strong> Bank your round points into your permanent <em>Total Score</em> and pass turn safely.</li>
+          <li><strong>🏆 Win the Game:</strong> The first player to reach the Target Score (default 50) wins!</li>
+        </ul>
+        <button class="btn btn--action btn--modal-ok" id="btn-modal-ok">Got it, Let's Play!</button>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
